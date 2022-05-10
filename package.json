@@ -1,0 +1,90 @@
+{
+   "name": "@scaffold-eth/typescript",
+   "version": "0.4.0",
+   "keywords": [
+      "ethereum",
+      "react",
+      "uniswap",
+      "workspaces",
+      "yarn"
+   ],
+   "private": true,
+   "scripts": {
+      "build": "yarn workspace @scaffold-eth/vite-app build",
+      "serve": "yarn workspace @scaffold-eth/vite-app serve",
+      "start": "yarn workspace @scaffold-eth/vite-app start",
+      "contracts:build": "yarn workspace @scaffold-eth/hardhat compile && yarn workspace @scaffold-eth/vite-app contracts:hardhat && yarn workspace @scaffold-eth/vite-app contracts:external",
+      "contracts:rebuild": "yarn workspace @scaffold-eth/hardhat clean && yarn contracts:build",
+      "hardhat": "yarn workspace @scaffold-eth/hardhat hardhat",
+      "compile": "yarn workspace @scaffold-eth/hardhat compile",
+      "chain": "yarn workspace @scaffold-eth/hardhat chain",
+      "fork": "yarn workspace @scaffold-eth/hardhat fork",
+      "test": "yarn workspace @scaffold-eth/hardhat test",
+      "export": "yarn workspace @scaffold-eth/hardhat export",
+      "deploy": "yarn workspace @scaffold-eth/hardhat deploy",
+      "watch": "yarn workspace @scaffold-eth/hardhat watch",
+      "generate": "yarn workspace @scaffold-eth/hardhat generate",
+      "account": "yarn workspace @scaffold-eth/hardhat account",
+      "balance": "yarn workspace @scaffold-eth/hardhat balance",
+      "ipfs": "yarn workspace @scaffold-eth/vite-app ipfs",
+      "surge": "yarn workspace @scaffold-eth/vite-app surge",
+      "s3": "yarn workspace @scaffold-eth/vite-app s3",
+      "ship": "yarn workspace @scaffold-eth/vite-app ship",
+      "subgraph": "yarn workspace @scaffold-eth/subgraph",
+      "prepare": "husky install",
+      "postinstall": "husky install",
+      "lint": "yarn workspace @scaffold-eth/vite-app lint --fix && yarn workspace @scaffold-eth/common lint --fix && yarn workspace @scaffold-eth/hardhat lint --fix"
+   },
+   "workspaces": {
+      "packages": [
+         "packages/common",
+         "packages/hardhat-ts",
+         "packages/vite-app-ts",
+         "packages/services/*",
+         "packages/services",
+         "packages/subgraph",
+         "packages/*"
+      ]
+   },
+   "packageManager": "yarn@3.2.0",
+   "devDependencies": {
+      "cross-env": "^7.0.3",
+      "eslint": "^8.14.0",
+      "husky": "^7.0.4",
+      "lint-staged": "^12.4.1",
+      "prettier": "^2.6.2",
+      "prettier-plugin-solidity": "^1.0.0-beta.19",
+      "shx": "^0.3.4",
+      "ts-node": "^10.7.0"
+   },
+   "lint-staged": {
+      "packages/vite-app-ts/src/**/*.{ts,tsx}": [
+         "yarn workspace @scaffold-eth/vite-app lint --fix",
+         "yarn workspace @scaffold-eth/vite-app format"
+      ],
+      "packages/common/src/**/*.{ts,tsx}": [
+         "yarn workspace @scaffold-eth/common lint --fix",
+         "yarn workspace @scaffold-eth/common format"
+      ],
+      "packages/hardhat-ts/test/**/*.ts": [
+         "yarn workspace @scaffold-eth/hardhat lint --fix",
+         "yarn workspace @scaffold-eth/hardhat format"
+      ],
+      "packages/hardhat-ts/helpers/**/*.ts": [
+         "yarn workspace @scaffold-eth/hardhat lint --fix",
+         "yarn workspace @scaffold-eth/hardhat format"
+      ],
+      "packages/hardhat-ts/tasks/**/*.ts": [
+         "yarn workspace @scaffold-eth/hardhat lint --fix",
+         "yarn workspace @scaffold-eth/hardhat format"
+      ],
+      "packages/hardhat-ts/deploy/**/*.ts": [
+         "yarn workspace @scaffold-eth/hardhat lint --fix",
+         "yarn workspace @scaffold-eth/hardhat format"
+      ],
+      "packages/hardhat-ts/**/*.sol": [
+         "yarn workspace @scaffold-eth/hardhat format",
+         "yarn workspace @scaffold-eth/hardhat solhint --fix"
+      ]
+   }
+}
