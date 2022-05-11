@@ -8,9 +8,10 @@ import { asEthersAdaptor } from 'eth-hooks/functions';
 import React, { FC, useEffect, useState } from 'react';
 import { BrowserRouter, Switch } from 'react-router-dom';
 
-import { MainPageFooter, MainPageHeader, createPagesAndTabs, TContractPageList } from './components/main';
+import { MainPageGame, MainPageHeader, createPagesAndTabs, TContractPageList } from './components/main';
 import { useScaffoldHooksExamples as useScaffoldHooksExamples } from './components/main/hooks/useScaffoldHooksExamples';
 
+import { Ramp, ThemeSwitcher } from '~~/components/common';
 import { useAppContracts, useConnectAppContracts, useLoadAppContracts } from '~~/components/contractContext';
 import { useCreateAntNotificationHolder } from '~~/components/main/hooks/useAntNotification';
 import { useBurnerFallback } from '~~/components/main/hooks/useBurnerFallback';
@@ -75,6 +76,8 @@ export const MainPage: FC = () => {
   const yourNFT = useAppContracts('YourNFT', ethersAppContext.chainId);
   const mainnetDai = useAppContracts('DAI', NETWORKS.mainnet.chainId);
 
+  // console.log(NETWORKS.mainnet.chainId);
+
   // keep track of a variable from the contract in the local React state:
   const [purpose, update] = useContractReader(
     yourContract,
@@ -106,17 +109,21 @@ export const MainPage: FC = () => {
   // This is the list of tabs and their contents
   const pageList: TContractPageList = {
     mainPage: {
-      name: 'YourContract',
-      content: (
-        <GenericContract
-          contractName="YourContract"
-          contract={yourContract}
-          mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
-          blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
-        />
-      ),
+      name: 'Game',
+      content: <MainPageGame scaffoldAppProviders={scaffoldAppProviders} />,
     },
     pages: [
+      {
+        name: 'YourContract',
+        content: (
+          <GenericContract
+            contractName="YourContract"
+            contract={yourContract}
+            mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
+            blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
+          />
+        ),
+      },
       {
         name: 'YourNFT',
         content: (
@@ -147,19 +154,27 @@ export const MainPage: FC = () => {
       <MainPageHeader scaffoldAppProviders={scaffoldAppProviders} price={ethPrice} />
       {/* Routes should be added between the <Switch> </Switch> as seen below */}
       <BrowserRouter>
-        {tabMenu}
-        <Switch>
-          {tabContents}
-          {/* Subgraph also disabled in MainPageMenu, it does not work, see github issue https://github.com/scaffold-eth/scaffold-eth-typescript/issues/48! */}
-          {/*
-          <Route path="/subgraph">
-            <Subgraph subgraphUri={subgraphUri} mainnetProvider={scaffoldAppProviders.mainnetAdaptor?.provider} />
-          </Route>
-          */}
-        </Switch>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            display: 'flex',
+            justifyContent: 'center',
+            width: '100%',
+            zIndex: 10,
+          }}>
+          {tabMenu}
+        </div>
+
+        <Switch>{tabContents}</Switch>
       </BrowserRouter>
 
-      <MainPageFooter scaffoldAppProviders={scaffoldAppProviders} price={ethPrice} />
+      <div style={{ display: 'none' }}>
+        {/* TODO: implement ramp with Transak */}
+        <Ramp price={ethPrice} address={ethersAppContext?.account ?? ''} networks={NETWORKS} />
+        <ThemeSwitcher />
+      </div>
+
       <div style={{ position: 'absolute' }}>{notificationHolder}</div>
     </div>
   );
