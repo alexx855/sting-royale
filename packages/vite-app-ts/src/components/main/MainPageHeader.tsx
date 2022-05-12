@@ -102,7 +102,7 @@ export const MainPageHeader: FC<IMainPageHeaderProps> = (props) => {
 
   return (
     <>
-      {left}
+      {/* {left} */}
       {right}
     </>
   );

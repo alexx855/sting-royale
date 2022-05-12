@@ -116,33 +116,39 @@ export const MainPage: FC = () => {
       {
         name: 'YourContract',
         content: (
-          <GenericContract
-            contractName="YourContract"
-            contract={yourContract}
-            mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
-            blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
-          />
+          <div style={{ marginTop: '100px' }}>
+            <GenericContract
+              contractName="YourContract"
+              contract={yourContract}
+              mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
+              blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
+            />
+          </div>
         ),
       },
       {
         name: 'YourNFT',
         content: (
-          <GenericContract
-            contractName="YourNFT"
-            contract={yourNFT}
-            mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
-            blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}></GenericContract>
+          <div style={{ marginTop: '100px' }}>
+            <GenericContract
+              contractName="YourNFT"
+              contract={yourNFT}
+              mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
+              blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}></GenericContract>
+          </div>
         ),
       },
       {
         name: 'Dai',
         content: (
-          <GenericContract
-            contractName="Dai"
-            contract={mainnetDai}
-            mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
-            blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
-          />
+          <div style={{ marginTop: '100px' }}>
+            <GenericContract
+              contractName="Dai"
+              contract={mainnetDai}
+              mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
+              blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
+            />
+          </div>
         ),
       },
     ],
