@@ -1,7 +1,7 @@
 import '~~/styles/main-page.css';
-import { NETWORKS } from '@scaffold-eth/common/src/constants';
+
 import { GenericContract } from 'eth-components/ant/generic-contract';
-import { useContractReader, useBalance, useEthersAdaptorFromProviderOrSigners, useEventListener } from 'eth-hooks';
+import { useBalance, useEthersAdaptorFromProviderOrSigners } from 'eth-hooks';
 import { useEthersAppContext } from 'eth-hooks/context';
 import { useDexEthPrice } from 'eth-hooks/dapps';
 import { asEthersAdaptor } from 'eth-hooks/functions';
@@ -11,7 +11,6 @@ import { BrowserRouter, Switch } from 'react-router-dom';
 import { MainPageGame, MainPageHeader, createPagesAndTabs, TContractPageList } from './components/main';
 import { useScaffoldHooksExamples as useScaffoldHooksExamples } from './components/main/hooks/useScaffoldHooksExamples';
 
-import { Ramp, ThemeSwitcher } from '~~/components/common';
 import { useAppContracts, useConnectAppContracts, useLoadAppContracts } from '~~/components/contractContext';
 import { useCreateAntNotificationHolder } from '~~/components/main/hooks/useAntNotification';
 import { useBurnerFallback } from '~~/components/main/hooks/useBurnerFallback';
@@ -72,22 +71,22 @@ export const MainPage: FC = () => {
   // -----------------------------
 
   // init contracts
-  const yourContract = useAppContracts('YourContract', ethersAppContext.chainId);
-  const yourNFT = useAppContracts('YourNFT', ethersAppContext.chainId);
-  const mainnetDai = useAppContracts('DAI', NETWORKS.mainnet.chainId);
+  const hiveContract = useAppContracts('Hive', ethersAppContext.chainId);
+  const beeContract = useAppContracts('Bee', ethersAppContext.chainId);
+  // const mainnetDai = useAppContracts('DAI', NETWORKS.mainnet.chainId);
 
   // console.log(NETWORKS.mainnet.chainId);
 
   // keep track of a variable from the contract in the local React state:
-  const [purpose, update] = useContractReader(
-    yourContract,
-    yourContract?.purpose,
-    [],
-    yourContract?.filters.SetPurpose()
-  );
+  // const [purpose, update] = useContractReader(
+  //   hiveContract,
+  //   hiveContract?.purpose,
+  //   [],
+  //   hiveContract?.filters.SetPurpose()
+  // );
 
   // 📟 Listen for broadcast events
-  const [setPurposeEvents] = useEventListener(yourContract, 'SetPurpose', 0);
+  // const [setPurposeEvents] = useEventListener(hiveContract, 'SetPurpose', 0);
 
   // -----------------------------
   // .... 🎇 End of examples
@@ -114,12 +113,12 @@ export const MainPage: FC = () => {
     },
     pages: [
       {
-        name: 'YourContract',
+        name: 'Hive',
         content: (
           <div style={{ marginTop: '100px' }}>
             <GenericContract
-              contractName="YourContract"
-              contract={yourContract}
+              contractName="Hive"
+              contract={hiveContract}
               mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
               blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
             />
@@ -127,37 +126,37 @@ export const MainPage: FC = () => {
         ),
       },
       {
-        name: 'YourNFT',
+        name: 'Bee',
         content: (
           <div style={{ marginTop: '100px' }}>
             <GenericContract
-              contractName="YourNFT"
-              contract={yourNFT}
+              contractName="Bee"
+              contract={beeContract}
               mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
               blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}></GenericContract>
           </div>
         ),
       },
-      {
-        name: 'Dai',
-        content: (
-          <div style={{ marginTop: '100px' }}>
-            <GenericContract
-              contractName="Dai"
-              contract={mainnetDai}
-              mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
-              blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
-            />
-          </div>
-        ),
-      },
+      // {
+      //   name: 'Dai',
+      //   content: (
+      //     <div style={{ marginTop: '100px' }}>
+      //       <GenericContract
+      //         contractName="Dai"
+      //         contract={mainnetDai}
+      //         mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
+      //         blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
+      //       />
+      //     </div>
+      //   ),
+      // },
     ],
   };
   const { tabContents, tabMenu } = createPagesAndTabs(pageList, route, setRoute);
 
   return (
     <div className="App">
-      <MainPageHeader scaffoldAppProviders={scaffoldAppProviders} price={ethPrice} />
+      <MainPageHeader price={ethPrice} scaffoldAppProviders={scaffoldAppProviders} />
       {/* Routes should be added between the <Switch> </Switch> as seen below */}
       <BrowserRouter>
         <div
@@ -175,11 +174,9 @@ export const MainPage: FC = () => {
         <Switch>{tabContents}</Switch>
       </BrowserRouter>
 
-      <div style={{ display: 'none' }}>
-        {/* TODO: implement ramp with Transak */}
-        <Ramp price={ethPrice} address={ethersAppContext?.account ?? ''} networks={NETWORKS} />
+      {/* <div style={{ zIndex: 11, position: 'absolute' }}>
         <ThemeSwitcher />
-      </div>
+      </div> */}
 
       <div style={{ position: 'absolute' }}>{notificationHolder}</div>
     </div>

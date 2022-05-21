@@ -86,5 +86,8 @@
          "yarn workspace @scaffold-eth/hardhat format",
          "yarn workspace @scaffold-eth/hardhat solhint --fix"
       ]
+   },
+   "dependencies": {
+      "eslint-plugin-tailwind": "^0.2.1"
    }
 }

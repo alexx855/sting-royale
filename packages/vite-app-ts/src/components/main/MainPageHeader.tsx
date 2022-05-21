@@ -1,8 +1,6 @@
 import { PageHeader } from 'antd';
 import { Account } from 'eth-components/ant';
-import { useGasPrice } from 'eth-hooks';
 import {
-  useEthersAppContext,
   connectorErrorText,
   NoStaticJsonRPCProviderFoundError,
   CouldNotActivateError,
@@ -13,7 +11,6 @@ import React, { FC, ReactNode, useCallback } from 'react';
 // import { FaucetHintButton } from '~~/components/common/FaucetHintButton';
 import { useAntNotification } from '~~/components/main/hooks/useAntNotification';
 import { IScaffoldAppProviders } from '~~/components/main/hooks/useScaffoldAppProviders';
-import { getNetworkInfo } from '~~/functions';
 
 // displays a page header
 export interface IMainPageHeaderProps {
@@ -28,14 +25,14 @@ export interface IMainPageHeaderProps {
  * @returns
  */
 export const MainPageHeader: FC<IMainPageHeaderProps> = (props) => {
-  const ethersAppContext = useEthersAppContext();
+  // const ethersAppContext = useEthersAppContext();
   // const selectedChainId = ethersAppContext.chainId;
 
   const notification = useAntNotification();
 
   // 🔥 This hook will get the price of Gas from ⛽️ EtherGasStation
-  const [gasPrice] = useGasPrice(ethersAppContext.chainId, 'fast', getNetworkInfo(ethersAppContext.chainId));
-  console.log('gasPrice', gasPrice);
+  // const [gasPrice] = useGasPrice(ethersAppContext.chainId, 'fast', getNetworkInfo(ethersAppContext.chainId));
+  // console.log('gasPrice', gasPrice);
   /**
    * this shows the page header and other informaiton
    */
