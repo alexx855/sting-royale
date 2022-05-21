@@ -1,4 +1,3 @@
-import { NetworkID } from '@dethcrypto/eth-sdk/dist/abi-management/networks';
 import { TExternalContractsAddressMap } from 'eth-hooks/models';
 
 /**
@@ -13,9 +12,9 @@ import { TExternalContractsAddressMap } from 'eth-hooks/models';
  * provide the name and address of the external contract and the definition will be generated
  */
 export const externalContractsAddressMap: TExternalContractsAddressMap = {
-  [NetworkID.MAINNET]: {
-    DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
-  },
+  // [NetworkID.MAINNET]: {
+  //   DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
+  // },
   // [NetworkID.POLYGON_MUMBAI]: {
   //   LENS_HUB: '0xd7B3481De00995046C7850bCe9a5196B7605c367',
   // },

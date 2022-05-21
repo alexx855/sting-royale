@@ -15,7 +15,7 @@ import { IScaffoldAppProviders } from '~~/components/main/hooks/useScaffoldAppPr
 // displays a page header
 export interface IMainPageHeaderProps {
   scaffoldAppProviders: IScaffoldAppProviders;
-  price: number;
+  price?: number;
   children?: ReactNode;
 }
 
@@ -87,7 +87,8 @@ export const MainPageHeader: FC<IMainPageHeaderProps> = (props) => {
           createLoginConnector={props.scaffoldAppProviders.createLoginConnector}
           loginOnError={onLoginError}
           ensProvider={props.scaffoldAppProviders.mainnetAdaptor?.provider}
-          price={props.price}
+          price={0}
+          // price={props.price}
           blockExplorer={props.scaffoldAppProviders.targetNetwork.blockExplorer}
           hasContextConnect={true}
         />

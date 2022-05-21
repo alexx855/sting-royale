@@ -13,36 +13,36 @@ export const web3ModalConfigKeys = {
 export const getWeb3ModalConfig = async (): Promise<Partial<ICoreOptions>> => {
   const providerOptions: Record<string, any> = {};
 
-  // === PORTIS
-  try {
-    const Portis = (await import('@portis/web3')).default;
-    providerOptions.portis = {
-      display: {
-        logo: 'https://user-images.githubusercontent.com/9419140/128913641-d025bc0c-e059-42de-a57b-422f196867ce.png',
-        name: 'Portis',
-        description: 'Connect to Portis App',
-      },
-      package: Portis,
-      options: {
-        id: '6255fb2b-58c8-433b-a2c9-62098c05ddc9',
-      },
-    };
-  } catch (e) {
-    console.log('Failed to load config for web3 connector Portis: ', e);
-  }
+  // // === PORTIS
+  // try {
+  //   const Portis = (await import('@portis/web3')).default;
+  //   providerOptions.portis = {
+  //     display: {
+  //       logo: 'https://user-images.githubusercontent.com/9419140/128913641-d025bc0c-e059-42de-a57b-422f196867ce.png',
+  //       name: 'Portis',
+  //       description: 'Connect to Portis App',
+  //     },
+  //     package: Portis,
+  //     options: {
+  //       id: '6255fb2b-58c8-433b-a2c9-62098c05ddc9',
+  //     },
+  //   };
+  // } catch (e) {
+  //   console.log('Failed to load config for web3 connector Portis: ', e);
+  // }
 
-  // === FORTMATIC
-  try {
-    const Fortmatic = (await import('fortmatic')).default;
-    providerOptions.fortmatic = {
-      package: Fortmatic,
-      options: {
-        key: 'pk_live_5A7C91B2FC585A17',
-      },
-    };
-  } catch (e) {
-    console.log('Failed to load config for web3 connector Fortmatic: ', e);
-  }
+  // // === FORTMATIC
+  // try {
+  //   const Fortmatic = (await import('fortmatic')).default;
+  //   providerOptions.fortmatic = {
+  //     package: Fortmatic,
+  //     options: {
+  //       key: 'pk_live_5A7C91B2FC585A17',
+  //     },
+  //   };
+  // } catch (e) {
+  //   console.log('Failed to load config for web3 connector Fortmatic: ', e);
+  // }
 
   // === COINBASE WALLETLINK
   try {
@@ -95,15 +95,15 @@ export const getWeb3ModalConfig = async (): Promise<Partial<ICoreOptions>> => {
     console.log('Failed to load config for web3 connector WalletConnect: ', e);
   }
 
-  // === AUTHEREUM
-  try {
-    const Authereum = (await import('authereum')).default;
-    providerOptions.authereum = {
-      package: Authereum,
-    };
-  } catch (e) {
-    console.log('Failed to load config for web3 connector Authereum: ', e);
-  }
+  // // === AUTHEREUM
+  // try {
+  //   const Authereum = (await import('authereum')).default;
+  //   providerOptions.authereum = {
+  //     package: Authereum,
+  //   };
+  // } catch (e) {
+  //   console.log('Failed to load config for web3 connector Authereum: ', e);
+  // }
 
   // === LOCALHOST STATIC
   try {

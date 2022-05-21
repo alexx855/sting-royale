@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { createConnectorForExternalContract, createConnectorForHardhatContract } from 'eth-hooks/context';
+import { createConnectorForHardhatContract } from 'eth-hooks/context';
 
 import hardhatContractsJson from '../generated/hardhat_contracts.json';
 
-import { externalContractsAddressMap } from './externalContracts.config';
-
 import * as hardhatContracts from '~~/generated/contract-types';
-import * as externalContracts from '~~/generated/external-contracts/esm/types';
 
 /**
  * ⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️
@@ -26,14 +23,14 @@ export const appContractsConfig = () => {
       // --------------------------------------------------
       // 🙋🏽‍♂️ Add your hadrdhat contracts here
       // --------------------------------------------------
-      Bee: createConnectorForHardhatContract('Bee', hardhatContracts.Bee__factory, hardhatContractsJson),
-
       Hive: createConnectorForHardhatContract('Hive', hardhatContracts.Hive__factory, hardhatContractsJson),
+
+      Bee: createConnectorForHardhatContract('Bee', hardhatContracts.Bee__factory, hardhatContractsJson),
 
       // --------------------------------------------------
       // 🙋🏽‍♂️ Add your external contracts here, make sure to define the address in `externalContractsConfig.ts`
       // --------------------------------------------------
-      DAI: createConnectorForExternalContract('DAI', externalContracts.DAI__factory, externalContractsAddressMap),
+      // DAI: createConnectorForExternalContract('DAI', externalContracts.DAI__factory, externalContractsAddressMap),
 
       // --------------------------------------------------
       // 🙋🏽‍♂️ Add your external abi here (unverified contracts)`

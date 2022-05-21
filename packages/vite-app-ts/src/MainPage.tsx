@@ -1,16 +1,16 @@
 import '~~/styles/main-page.css';
 
 import { GenericContract } from 'eth-components/ant/generic-contract';
-import { useBalance, useEthersAdaptorFromProviderOrSigners } from 'eth-hooks';
+import { useEthersAdaptorFromProviderOrSigners } from 'eth-hooks';
 import { useEthersAppContext } from 'eth-hooks/context';
-import { useDexEthPrice } from 'eth-hooks/dapps';
+// import { useDexEthPrice } from 'eth-hooks/dapps';
 import { asEthersAdaptor } from 'eth-hooks/functions';
 import React, { FC, useEffect, useState } from 'react';
 import { BrowserRouter, Switch } from 'react-router-dom';
 
 import { MainPageGame, MainPageHeader, createPagesAndTabs, TContractPageList } from './components/main';
-import { useScaffoldHooksExamples as useScaffoldHooksExamples } from './components/main/hooks/useScaffoldHooksExamples';
 
+import { ThemeSwitcher } from '~~/components/common';
 import { useAppContracts, useConnectAppContracts, useLoadAppContracts } from '~~/components/contractContext';
 import { useCreateAntNotificationHolder } from '~~/components/main/hooks/useAntNotification';
 import { useBurnerFallback } from '~~/components/main/hooks/useBurnerFallback';
@@ -58,13 +58,13 @@ export const MainPage: FC = () => {
   // 🏭 connec to  contracts for current network & signer
   useConnectAppContracts(asEthersAdaptor(ethersAppContext));
 
-  // -----------------------------
-  // Hooks use and examples
-  // -----------------------------
-  // 🎉 Console logs & More hook examples:
-  // 🚦 disable this hook to stop console logs
-  // 🏹🏹🏹 go here to see how to use hooks!
-  useScaffoldHooksExamples(scaffoldAppProviders);
+  // // -----------------------------
+  // // Hooks use and examples
+  // // -----------------------------
+  // // 🎉 Console logs & More hook examples:
+  // // 🚦 disable this hook to stop console logs
+  // // 🏹🏹🏹 go here to see how to use hooks!
+  // useScaffoldHooksExamples(scaffoldAppProviders);
 
   // -----------------------------
   // These are the contracts!
@@ -92,10 +92,10 @@ export const MainPage: FC = () => {
   // .... 🎇 End of examples
   // -----------------------------
   // 💵 This hook will get the price of ETH from 🦄 Uniswap:
-  const [ethPrice] = useDexEthPrice(scaffoldAppProviders.mainnetAdaptor?.provider, scaffoldAppProviders.targetNetwork);
+  // const [ethPrice] = useDexEthPrice(scaffoldAppProviders.mainnetAdaptor?.provider, scaffoldAppProviders.targetNetwork);
 
   // 💰 this hook will get your balance
-  const [yourCurrentBalance] = useBalance(ethersAppContext.account);
+  // const [yourCurrentBalance] = useBalance(ethersAppContext.account);
 
   const [route, setRoute] = useState<string>('');
   useEffect(() => {
@@ -156,7 +156,7 @@ export const MainPage: FC = () => {
 
   return (
     <div className="App">
-      <MainPageHeader price={ethPrice} scaffoldAppProviders={scaffoldAppProviders} />
+      <MainPageHeader scaffoldAppProviders={scaffoldAppProviders} />
       {/* Routes should be added between the <Switch> </Switch> as seen below */}
       <BrowserRouter>
         <div
@@ -174,9 +174,9 @@ export const MainPage: FC = () => {
         <Switch>{tabContents}</Switch>
       </BrowserRouter>
 
-      {/* <div style={{ zIndex: 11, position: 'absolute' }}>
+      <div style={{ zIndex: 11, position: 'absolute' }}>
         <ThemeSwitcher />
-      </div> */}
+      </div>
 
       <div style={{ position: 'absolute' }}>{notificationHolder}</div>
     </div>

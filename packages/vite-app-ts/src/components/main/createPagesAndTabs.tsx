@@ -1,4 +1,4 @@
-import { Menu } from 'antd';
+import { Menu, MenuProps } from 'antd';
 import React from 'react';
 import { Link, Route } from 'react-router-dom';
 /**
@@ -36,14 +36,9 @@ export const createPagesAndTabs = (
     return n.replaceAll(' ', '-');
   };
 
-  const tabMenu = (
-    <Menu
-      style={{
-        textAlign: 'center',
-      }}
-      selectedKeys={[route]}
-      mode="horizontal">
-      <Menu.Item key="/">
+  const menuItems: MenuProps['items'] = [
+    {
+      label: (
         <Link
           onClick={(): void => {
             setRoute('/');
@@ -51,19 +46,35 @@ export const createPagesAndTabs = (
           to="/">
           {pageList.mainPage.name}
         </Link>
-      </Menu.Item>
-      {pageList.pages.map(({ name }) => (
-        <Menu.Item key={name}>
-          <Link
-            onClick={(): void => {
-              setRoute(getPath(name));
-            }}
-            to={name}>
-            {name}
-          </Link>
-        </Menu.Item>
-      ))}
-    </Menu>
+      ),
+      key: 'root',
+    },
+  ];
+
+  for (const page of pageList.pages) {
+    menuItems.push({
+      label: (
+        <Link
+          onClick={(): void => {
+            setRoute(getPath(page.name));
+          }}
+          to={getPath(page.name)}>
+          {page.name}
+        </Link>
+      ),
+      key: page.name,
+    });
+  }
+
+  const tabMenu = (
+    <Menu
+      style={{
+        textAlign: 'center',
+      }}
+      selectedKeys={[route]}
+      mode="horizontal"
+      items={menuItems}
+    />
   );
 
   const pageContent = (

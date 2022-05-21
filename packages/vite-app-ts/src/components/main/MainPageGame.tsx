@@ -1,6 +1,9 @@
 import { Stage } from '@inlet/react-pixi';
+import { transactor } from 'eth-components/functions';
+import { EthComponentsSettingsContext } from 'eth-components/models';
+import { useEthersAppContext } from 'eth-hooks/context';
 import { Viewport } from 'pixi-viewport';
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 // import { useEthersAppContext } from 'eth-hooks/context';
 
@@ -11,7 +14,10 @@ import PixiViewport from '../pixi/PixiViewportComponent';
 
 import { useWindowSize } from './hooks/useWindowSize';
 
-import { IScaffoldAppProviders } from '~~/components/main/hooks/useScaffoldAppProviders';
+import {
+  IScaffoldAppProviders,
+  useScaffoldProviders as useScaffoldAppProviders,
+} from '~~/components/main/hooks/useScaffoldAppProviders';
 import {
   DEMO_ADDRESS,
   Grid,
@@ -28,13 +34,51 @@ import { trimAddress } from '~~/functions/trimAddress';
 import { IGameState, IPlayerState } from '~~/helpers/interfaces';
 
 export interface IMainPageGameProps {
-  scaffoldAppProviders?: IScaffoldAppProviders;
+  scaffoldAppProviders: IScaffoldAppProviders;
   children?: React.ReactNode;
 }
 
 export const MainPageGame: FC<IMainPageGameProps> = (props) => {
   // TODO: test spawn points
   // console.log(SPAWN_POINTS[0][0] === Object.values(Hexagon)[0].x, SPAWN_POINTS[0][1] === Object.values(Hexagon)[0].y);
+
+  // -----------------------------
+  // Hooks use and examples
+  // -----------------------------
+  // 🎉 Console logs & More hook examples:
+  // 🚦 disable this hook to stop console logs
+  // 🏹🏹🏹 go here to see how to use hooks!
+  // useScaffoldHooksExamples(props.scaffoldAppProviders);
+
+  // 🦊 Get your web3 ethers context from current providers
+  const ethComponentsSettings = useContext(EthComponentsSettingsContext);
+  const ethersAppContext = useEthersAppContext();
+  // const mainnetDai = useAppContracts('DAI', NETWORKS.mainnet.chainId);
+
+  const scaffoldAppProviders = useScaffoldAppProviders();
+  const exampleMainnetProvider = scaffoldAppProviders.mainnetAdaptor?.provider;
+  const currentChainId: number | undefined = ethersAppContext.chainId;
+  // console.log('currentChainId', currentChainId);
+
+  // ---------------------
+  // 🏦 get your balance
+  // ---------------------
+  // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
+  // const [yourLocalBalance] = useBalance(ethersAppContext.account);
+
+  // Just plug in different 🛰 providers to get your balance on different chains:
+  // const [mainnetAdaptor] = useEthersAdaptorFromProviderOrSigners(exampleMainnetProvider);
+  // const [yourMainnetBalance, yUpdate, yStatus] = useBalance(ethersAppContext.account, mergeDefaultUpdateOptions(), {
+  //   adaptorEnabled: true,
+  //   adaptor: mainnetAdaptor,
+  // });
+
+  // console.log('🏦 yourLocalBalance:', yourLocalBalance);
+  // console.log('🏦 yourMainnetBalance:', yourMainnetBalance);
+  // console.log('🏦 yUpdate:', yUpdate);
+  // console.log('🏦 yStatus:', yStatus);
+
+  const tx = transactor(ethComponentsSettings, ethersAppContext?.signer);
 
   // save the actual viewport ref
   const viewportRef = useRef();
@@ -44,8 +88,20 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
   // TODO: implement camera follow current bee
   // const [following, setFollowing] = useState(false);
 
-  const [currentAddress, setCurrentAddress] = useState(DEMO_ADDRESS[0]);
+  // TODO: handle account change
+  const [account, setAccount] = useState(ethersAppContext.account);
   const [gameState, setGameState] = useState<IGameState>(INIT_GAME_STATE);
+
+  // useEffect(() => {
+  //   console.log('🏦 useEffect:', account);
+
+  //   // only does it on local host and once cuz of the useeffect for safety
+  //   if (tx && ethersAppContext?.chainId === NETWORKS.localhost.chainId) {
+  //     // console.log('tx', tx);
+  //     // const someaddress = ethersAppContext?.account;
+  //     // tx(writeContracts.Bee.mintItem());
+  //   }
+  // }, [account]);
 
   const addPlayer = useCallback(
     (address: string): void => {
@@ -104,7 +160,10 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
     // clean previous game state
     const { status } = gameState;
 
-    if (status === 'playing') return;
+    if (!account || status === 'playing') {
+      console.log('🚫 not ready to play');
+      return;
+    }
 
     if (status === 'finished' || status === 'ready') {
       // start a new game, reset all states
@@ -116,28 +175,34 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
     }
 
     //
-    addPlayer(currentAddress);
+    addPlayer(account);
   };
 
-  const changePlayer = (): void => {
-    const addressList = Object.keys(gameState.players);
-    const currentPlayerIndex = addressList.indexOf(currentAddress);
-    const nextIndex = currentPlayerIndex + 1 >= addressList.length ? 0 : currentPlayerIndex + 1;
+  // const changePlayer = (): void => {
+  //   const addressList = Object.keys(gameState.players);
+  //   const currentPlayerIndex = addressList.indexOf(account);
+  //   const nextIndex = currentPlayerIndex + 1 >= addressList.length ? 0 : currentPlayerIndex + 1;
 
-    if (nextIndex === currentPlayerIndex) {
-      console.log('nothing to change');
-      return;
-    }
+  //   if (nextIndex === currentPlayerIndex) {
+  //     console.log('nothing to change');
+  //     return;
+  //   }
 
-    console.log(`changin ${trimAddress(currentAddress)} to ${trimAddress(addressList[nextIndex])}`);
-    setCurrentAddress(addressList[nextIndex]);
-  };
+  //   console.log(`changin ${trimAddress(account)} to ${trimAddress(addressList[nextIndex])}`);
+  //   setAccount(addressList[nextIndex]);
+  // };
 
   const move = useCallback(
     (coords?: [number, number]): void => {
-      // console.log(gameState);
-      const { players, honeycomb } = gameState;
-      const player = players[currentAddress];
+      const { players, status, honeycomb } = gameState;
+
+      if (!account || status !== 'playing') {
+        console.log('🚫 not ready to move');
+        return;
+      }
+
+      const player = players[account];
+      console.log('move', account);
       // console.log('move', coords);
 
       // TODO: check for game state
@@ -186,36 +251,50 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
         return;
       }
 
-      const movingToCoords = coordToString([movingTo.x, movingTo.y]);
+      // const movingToCoords = coordToString([movingTo.x, movingTo.y]);
+
+      const newPlayers = players;
+      const newHoneycomb = honeycomb;
+
+      // TODO: rm only for demo
+      // randomly move other bees
+      for (const address in players) {
+        const playerCoords = coordFromString(players[address].coords as string);
+        const playerHex = Hexagon.get(playerCoords);
+        if (playerHex) {
+          const randomNeighbors = Hexagon.neighborsOf(playerHex).filter((hex) => hex !== undefined);
+          const randomNeighbor = randomNeighbors[Math.floor(Math.random() * randomNeighbors.length)];
+          // const randomNeighborCoords = coordToString([randomNeighbor.x, randomNeighbor.y]);
+
+          const nextCoord = address === account ? movingTo : randomNeighbor;
+          const nextCoordString = coordToString([nextCoord.x, nextCoord.y]);
+
+          newPlayers[address] = {
+            ...newPlayers[address],
+            status: 'moving',
+            // points: newPlayers[address].points - 5, // ?? rm point on move
+            coords: nextCoordString,
+          };
+
+          newHoneycomb[nextCoordString] = {
+            ...newHoneycomb[nextCoordString],
+            addresses: [...newHoneycomb[nextCoordString].addresses, address],
+          };
+        }
+      }
 
       setGameState({
         ...gameState,
-        honeycomb: {
-          ...honeycomb,
-          [movingToCoords]: {
-            ...honeycomb[movingToCoords],
-            addresses: [...honeycomb[movingToCoords].addresses, currentAddress],
-          },
-        },
-        players: {
-          ...players,
-          [currentAddress]: {
-            ...player,
-            // status: 'moving', // only used for UI, same as dead status
-            points: player.points - 10, // TODO: move this logic to backend or add logic to main ticker
-            coords: coordToString([movingTo.x, movingTo.y]),
-          },
-        },
+        honeycomb: newHoneycomb,
+        players: newPlayers,
       });
 
       // TODO: test if all init with 3 neighbors at SPAWN_POINT
       console.log(
-        `moving player ${trimAddress(currentAddress)} from  ${currentHex.x}, ${currentHex.y} to ${movingTo.x}, ${
-          movingTo.y
-        }`
+        `moving player ${trimAddress(account)} from  ${currentHex.x}, ${currentHex.y} to ${movingTo.x}, ${movingTo.y}`
       );
     },
-    [currentAddress, gameState, setGameState]
+    [account, gameState, setGameState]
   );
 
   const onClick = useCallback(
@@ -248,7 +327,14 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
   // }, 1000);
 
   useEffect(() => {
-    console.log('useEffect');
+    console.log('useEffect', account);
+
+    if (ethersAppContext.account !== account) {
+      console.log('account changed', account);
+      setAccount(ethersAppContext.account);
+    }
+
+    // account = ethersAppContext.account;
     const { status, players, block, honeycomb } = gameState;
 
     // update events for viewport
@@ -260,7 +346,7 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
 
     const interval = setInterval(() => {
       // check if playing
-      if (status !== 'playing') {
+      if (status !== 'playing' || !account) {
         // RM this only for testing, add a new player using the demos address
         if (status === 'queuing') {
           addPlayer(DEMO_ADDRESS[Object.keys(players).length]);
@@ -271,184 +357,175 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
             status: 'playing',
           });
         }
-        return;
-      }
+        // return;
+      } else {
+        console.log('tick', ethersAppContext);
 
-      console.log('tick');
+        // check for win conditions or game end
 
-      // check for win conditions or game end
+        const nextBlock = block + 1;
+        const newPlayers = { ...players };
+        const newHoneycomb = { ...honeycomb };
 
-      const nextBlock = block + 1;
-      const newPlayers = { ...players };
-      const newHoneycomb = { ...honeycomb };
+        // every n ticks remove one hex in spral ring starting from the center
+        const numberOfBlocks = 10;
+        if (nextBlock % numberOfBlocks === 0) {
+          const radius = SETTINGS.radius;
+          const ring = radius - Math.floor(nextBlock / numberOfBlocks) + 1;
 
-      // every n ticks remove one hex in spral ring starting from the center
-      const numberOfBlocks = 10;
-      if (nextBlock % numberOfBlocks === 0) {
-        const radius = SETTINGS.radius;
-        const ring = radius - Math.floor(nextBlock / numberOfBlocks) + 1;
+          if (ring >= 1) {
+            // console.log('ring', Math.floor(nextBlock % 10));
+            let result = 0;
+            let tmp = 0;
+            let tmp2 = 0;
 
-        if (ring >= 1) {
-          // console.log('ring', Math.floor(nextBlock % 10));
-          let result = 0;
-          let tmp = 0;
-          let tmp2 = 0;
+            // get index recursively
+            for (let i = 1; i <= ring; i++) {
+              tmp = i * 6;
 
-          // get index recursively
-          for (let i = 1; i <= ring; i++) {
-            tmp = i * 6;
+              result = tmp + tmp2;
+              tmp = tmp2;
+              tmp2 = result;
+            }
 
-            result = tmp + tmp2;
-            tmp = tmp2;
-            tmp2 = result;
+            for (let j = 0; j < ring * 6; j++) {
+              // start from result backwards
+              const currentHex = Hexagon.get(result - j);
+
+              if (!currentHex) {
+                console.info('no hex found for current coords ', j);
+                continue;
+              }
+
+              const coords = `${currentHex.x},${currentHex.y}`;
+              const hex = newHoneycomb[coords];
+
+              if (!hex) {
+                console.info('no hex found for coords ', coords);
+                continue;
+              }
+
+              newHoneycomb[coords] = {
+                ...newHoneycomb[`${currentHex.x},${currentHex.y}`],
+                cursed: true,
+                redward: false, // cursed hexes can not  redward
+              };
+            }
           }
+        }
 
-          for (let j = 0; j < ring * 6; j++) {
-            // start from result backwards
-            const currentHex = Hexagon.get(result - j);
+        // calculate all player points this block
+        for (const [address, player] of Object.entries(newPlayers)) {
+          // if (player.status === 'dead') continue;
+          if (player.points <= 0) {
+            newPlayers[address] = {
+              ...player,
+              status: 'dead',
+              points: 0,
+            };
+          } else {
+            // reduce 1 per block
+            let newPoints = player.points - 1;
 
-            if (!currentHex) {
-              console.info('no hex found for current coords ', j);
-              continue;
+            // if a bee is in a hex with honey (redward) gets + 100 points
+            if (newHoneycomb[player.coords as string].redward) {
+              newPoints += 100;
+
+              // rm the honey
+              newHoneycomb[player.coords as string].redward = false;
             }
 
-            const coords = `${currentHex.x},${currentHex.y}`;
-            const hex = newHoneycomb[coords];
+            // if a bee is in the same hex as another bee, the bee with the highest points steals the others
+            const beeAddresses = honeycomb[player.coords as string].addresses;
+            // console.log('beeAddresses', beeAddresses);
 
-            if (!hex) {
-              console.info('no hex found for coords ', coords);
-              continue;
+            // TODO: review this logic
+            if (beeAddresses.length > 1) {
+              const beePoints = beeAddresses.map((address) => newPlayers[address].points);
+              const maxPoints = Math.max(...beePoints);
+              const maxPointsAddress = beeAddresses.find((address) => newPlayers[address].points === maxPoints);
+              // console.log('maxPointsAddress', maxPointsAddress);
+              // console.log('maxPoints', maxPoints);
+              // console.log('address', address);
+
+              if (maxPointsAddress === address) {
+                newPoints = newPlayers[maxPointsAddress].points;
+              } else {
+                newPoints = 0;
+              }
             }
 
-            newHoneycomb[coords] = {
-              ...newHoneycomb[`${currentHex.x},${currentHex.y}`],
-              cursed: true,
-              redward: false, // cursed hexes can not  redward
+            // if a bee is in a cursed hex, it dies
+            if (newHoneycomb[player.coords as string].cursed) {
+              newPoints = 0;
+            }
+
+            newPlayers[address] = {
+              ...player,
+              status: 'idle',
+              points: newPoints,
             };
           }
         }
-      }
 
-      // calculate all player points this block
-      for (const [address, player] of Object.entries(newPlayers)) {
-        // if (player.status === 'dead') continue;
-        if (player.points <= 0) {
-          newPlayers[address] = {
-            ...player,
-            status: 'dead',
-            points: 0,
-          };
-        } else {
-          // reduce 1 per block
-          let newPoints = player.points - 1;
+        // randomly spawn a redward to an empty honeycomb hex with a chance of 10 in SETTINGS.radius * 2
+        if (Math.random() * SETTINGS.radius * 2 < 10) {
+          const emptyHexes = Object.keys(newHoneycomb).filter((hex) => {
+            const { addresses, cursed, redward } = newHoneycomb[hex];
+            return !cursed && !redward && addresses.length === 0;
+          });
 
-          // if a bee is in a hex with honey (redward) gets + 100 points
-          if (newHoneycomb[player.coords as string].redward) {
-            newPoints += 100;
-          }
+          // check if there is a honeycomb hex with a redward
+          const redwardHexes = Object.keys(newHoneycomb).filter((hex) => {
+            const { redward } = newHoneycomb[hex];
+            return redward;
+          });
 
-          // if a bee is in the same hex as another bee, the bee with the highest points steals the others
-          const beeAddresses = honeycomb[player.coords as string].addresses;
-          console.log('beeAddresses', beeAddresses);
+          if (emptyHexes.length > 0 && redwardHexes.length === 0) {
+            // get random empty hex
+            const randomHex = emptyHexes[Math.floor(Math.random() * emptyHexes.length)];
 
-          // TODO: review this logic
-          if (beeAddresses.length > 1) {
-            const beePoints = beeAddresses.map((address) => newPlayers[address].points);
-            const maxPoints = Math.max(...beePoints);
-            const maxPointsAddress = beeAddresses.find((address) => newPlayers[address].points === maxPoints);
-            console.log('maxPointsAddress', maxPointsAddress);
-            console.log('maxPoints', maxPoints);
-            console.log('address', address);
+            // get hex from hexagon
+            const hexCoords = Hexagon.get(coordFromString(randomHex));
+            console.log('hexCoords', hexCoords);
 
-            if (maxPointsAddress === address) {
-              newPoints = newPlayers[maxPointsAddress].points;
-            } else {
-              newPoints = 0;
+            if (hexCoords) {
+              // redward a random empty hex
+              newHoneycomb[randomHex] = {
+                ...newHoneycomb[randomHex],
+                redward: true,
+              };
             }
           }
-
-          // if a bee is in a cursed hex, it dies
-          if (newHoneycomb[player.coords as string].cursed) {
-            newPoints = 0;
-          }
-
-          newPlayers[address] = {
-            ...player,
-            points: newPoints,
-          };
         }
-      }
 
-      // randomly spawn a redward to an empty honeycomb hex with a chance of 1 in SETTINGS.radius * 2
-      if (Math.random() * SETTINGS.radius * 2 < 1) {
-        const emptyHexes = Object.keys(newHoneycomb).filter((hex) => {
-          const { addresses, cursed, redward } = newHoneycomb[hex];
-          return !cursed && !redward && addresses.length === 0;
+        // check for end game conditions
+        const playersCount = Object.values(gameState.players).filter((player) => player.points > 0).length;
+        const endGame = players[account].status === 'dead' || playersCount <= 1;
+        const winner =
+          playersCount === 1
+            ? Object.keys(gameState.players).find((address) => gameState.players[address].points > 0)
+            : null;
+
+        setGameState({
+          ...gameState,
+          players: newPlayers,
+          honeycomb: newHoneycomb,
+          status: endGame ? 'finished' : gameState.status,
+          // TODO: review this, not sure if its needed in the global gamestate
+          prevGameResults: endGame
+            ? players[account].points > 0
+              ? 'You win!'
+              : playersCount === 1
+              ? `You lose! ${trimAddress(winner as string)} won`
+              : 'Draw! nobee survived'
+            : '',
+          block: !endGame ? nextBlock : block,
         });
-        // console.log('emptyHexes', emptyHexes);
-
-        // check if at least one empty hex
-        if (emptyHexes.length === 0) {
-          console.log('no empty hexes to spawn redward');
-          return;
-        }
-
-        // check if there is a honeycomb hex with a redward
-        const redwardHexes = Object.keys(newHoneycomb).filter((hex) => {
-          const { redward } = newHoneycomb[hex];
-          return redward;
-        });
-
-        if (redwardHexes.length > 0) {
-          console.log(`redward already present on coords ${redwardHexes} `);
-          return;
-        }
-
-        // get random empty hex
-        const randomHex = emptyHexes[Math.floor(Math.random() * emptyHexes.length)];
-
-        // get hex from hexagon
-        const hexCoords = Hexagon.get(coordFromString(randomHex));
-        console.log('hexCoords', hexCoords);
-
-        if (!hexCoords) {
-          console.log('no honeycomb hex found for ', randomHex);
-          return;
-        }
-
-        // redward a random empty hex
-        newHoneycomb[randomHex] = {
-          ...newHoneycomb[randomHex],
-          redward: true,
-        };
       }
-
-      // check for end game conditions
-      const playersCount = Object.values(gameState.players).filter((player) => player.points > 0).length;
-      const endGame = playersCount <= 1;
-      const winner =
-        playersCount === 1
-          ? Object.keys(gameState.players).find((address) => gameState.players[address].points > 0)
-          : null;
-
-      setGameState({
-        ...gameState,
-        players: newPlayers,
-        honeycomb: newHoneycomb,
-        status: endGame ? 'finished' : status,
-        // TODO: review this, not sure if its needed in the global gamestate
-        prevGameResults: endGame
-          ? players[currentAddress].points > 0
-            ? 'You win!'
-            : playersCount === 1
-            ? `You lose! ${trimAddress(winner as string)} won`
-            : 'Draw! nobee survived'
-          : '',
-        block: !endGame ? nextBlock : block,
-      });
     }, 1000);
     return () => clearInterval(interval);
-  }, [gameState, currentAddress, addPlayer, onClick]);
+  }, [gameState, ethersAppContext, account, addPlayer, onClick]);
 
   const { width, height } = useWindowSize();
 
@@ -466,14 +543,12 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
 
   const { status, players, block, honeycomb, prevGameResults } = gameState;
 
-  const player = players[currentAddress];
-
   return (
     <>
       <div className="absolute buttons-group top-2 left-2">
         {status === 'loading' && <p>Loading...</p>}
 
-        {(status === 'finished' || status === 'loaded') && (
+        {account && (status === 'finished' || status === 'loaded') && (
           <>
             <button
               onClick={(): void => {
@@ -482,41 +557,52 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
               Play {prevGameResults ? 'again' : 'game'}
             </button>
             {prevGameResults && <p className="p-2 mt-2 text-2xl bg-white">{prevGameResults}</p>}
+            {prevGameResults && prevGameResults === 'You win!' && (
+              <button
+                onClick={(): void => {
+                  play();
+                }}>
+                Claim your Bee NFT
+              </button>
+            )}
           </>
         )}
 
         {status === 'queuing' && (
           <>
             <p>Waiting for players... {Object.keys(players).length}/6</p>
-            <button
+            {/* <button
               onClick={(): void => {
                 addPlayer(DEMO_ADDRESS[Object.keys(players).length]);
               }}>
               Add demo player
-            </button>
+            </button> */}
           </>
         )}
 
         {status === 'playing' && (
           <>
             <button onClick={(): void => move()}>Auto Move</button>
-            <button onClick={(): void => changePlayer()}>Next Bee</button>
+            {/* <button onClick={(): void => changePlayer()}>Next Bee</button> */}
             {/* <button onClick={(): void => toggleFollow()}>{!following ? 'Follow' : 'Stop Follow'}</button>
             <button onClick={(): void => centerBee()}>Center</button> */}
 
-            <p className="p-2 mt-2 text-2xl bg-white">
-              <small>Playing as {trimAddress(currentAddress)}</small> <br />
-              <small>
-                {player.status === 'moving'
-                  ? `Moving to ${player.coords}`
-                  : player.status === 'dead'
-                  ? `Died at ${player.coords}`
-                  : `Iddling at ${player.coords}`}
-              </small>{' '}
-              <br />
-              <small>Points {player.points}</small> <br />
-              <small>Current block {block}</small>
-            </p>
+            {/* TODO: review why is failing */}
+            {account && players[account] && (
+              <p className="p-2 mt-2 text-2xl bg-white">
+                <small>Playing as {trimAddress(account)}</small> <br />
+                <small>
+                  {players[account].status === 'moving'
+                    ? `Moving to ${players[account].coords || 'err'}`
+                    : players[account].status === 'dead'
+                    ? `Died at ${players[account].coords || 'err'}`
+                    : `Iddling at ${players[account].coords || 'err'}`}
+                </small>{' '}
+                <br />
+                <small>Points {players[account].points}</small> <br />
+                <small>Current block {block}</small>
+              </p>
+            )}
           </>
         )}
       </div>
@@ -565,7 +651,7 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
                 <BeeComponent
                   players={players}
                   address={address}
-                  ref={address === currentAddress ? beeRef : undefined}
+                  ref={address === account ? beeRef : undefined}
                   key={address}
                 />
               ))}
