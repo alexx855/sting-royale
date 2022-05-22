@@ -49,6 +49,19 @@ const networks = {
       mnemonic: getMnemonic(),
     },
   }),
+  mumbai: {
+    name: 'mumbai',
+    color: '#92D9FA',
+    chainId: 80001,
+    price: 1,
+    gasPrice: 1100000000,
+    url: 'https://rpc-mumbai.maticvigil.com/v1/1d8b2e650bfc23a711e67d2f67495e64a55c56d3',
+    faucet: 'https://faucet.matic.network/',
+    blockExplorer: 'https://mumbai-explorer.matic.today/',
+    accounts: {
+      mnemonic: getMnemonic(),
+    },
+  },
   localhost: {
     url: 'http://localhost:8545',
     /*

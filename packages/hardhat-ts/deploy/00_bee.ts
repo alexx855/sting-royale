@@ -5,6 +5,7 @@ const func: DeployFunction = async (hre: THardhatRuntimeEnvironmentExtended) => 
   const { getNamedAccounts, deployments } = hre;
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
+
   console.log('deployer', deployer);
 
   await deploy('Bee', {
@@ -13,6 +14,14 @@ const func: DeployFunction = async (hre: THardhatRuntimeEnvironmentExtended) => 
     // args: ["Hello"],
     log: true,
   });
+
+  // try {
+  //   const bee = await deploy('Bee', { from: deployer, gasLimit: 4000000 });
+
+  //   console.log('deployed', bee.address);
+  // } catch (error) {
+  //   console.log('error', error);
+  // }
 };
 export default func;
 func.tags = ['Bee'];
