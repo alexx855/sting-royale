@@ -2,11 +2,13 @@ import { Stage } from '@inlet/react-pixi';
 import { transactor } from 'eth-components/functions';
 import { EthComponentsSettingsContext } from 'eth-components/models';
 import { useEthersAppContext } from 'eth-hooks/context';
+import { ContractTransaction } from 'ethers';
 import { Viewport } from 'pixi-viewport';
 import React, { FC, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 // import { useEthersAppContext } from 'eth-hooks/context';
 
+import { useAppContracts } from '../contractContext';
 import BeeComponent from '../pixi/PixiBeeComponent';
 import PixiContainer from '../pixi/PixiContainer';
 import PixiHoneycomb from '../pixi/PixiHoneycomb';
@@ -78,7 +80,29 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
   // console.log('🏦 yUpdate:', yUpdate);
   // console.log('🏦 yStatus:', yStatus);
 
-  const tx = transactor(ethComponentsSettings, ethersAppContext?.signer);
+  // const settingsContext = useContext(EthComponentsSettingsContext);
+
+  // const [yourLocalBalance] = useBalance(ethersAppContext.account ?? '');
+  // console.log('🏦 yourLocalBalance:', yourLocalBalance);
+  // const signer = props.scaffoldAppProviders.localAdaptor?.signer;
+  /**
+   * create transactor for faucet
+   */
+  // const faucetTx = transactor(settingsContext, signer, undefined, undefined, true);
+
+  // // Load in your local 📝 contract and read a value from it:
+  // const readContracts = useContractLoader(scaffoldAppProviders.mainnetAdaptor?.provider, signer, );
+
+  // // If you want to make 🔐 write transactions to your contracts, use the userProvider:
+  // const writeContracts = useContractLoader(userProvider, signer, );
+
+  // // keep track of a variable from the contract in the local React state:
+  // const balance = useContractReader(readContracts, "YourCollectible", "balanceOf", [address]);
+  // console.log("🤗 balance:", balance);
+
+  // // 📟 Listen for broadcast events
+  // const transferEvents = useEventListener(readContracts, "YourCollectible", "Transfer", localProvider, 1);
+  // console.log("📟 Transfer events:", transferEvents);
 
   // save the actual viewport ref
   const viewportRef = useRef();
@@ -92,18 +116,14 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
   const [account, setAccount] = useState(ethersAppContext.account);
   const [gameState, setGameState] = useState<IGameState>(INIT_GAME_STATE);
 
-  // useEffect(() => {
-  //   console.log('🏦 useEffect:', account);
+  // const [block, setBlock] = useState(0);
 
-  //   // only does it on local host and once cuz of the useeffect for safety
-  //   if (tx && ethersAppContext?.chainId === NETWORKS.localhost.chainId) {
-  //     // console.log('tx', tx);
-  //     // const someaddress = ethersAppContext?.account;
-  //     // tx(writeContracts.Bee.mintItem());
-  //   }
-  // }, [account]);
+  // keep track of a variable from the contract in the local React state:
+  // const balance = useContractReader(readContracts, "YourCollectible", "balanceOf", [address]);
+  // console.log("🤗 balance:", balance);
 
-  const addPlayer = useCallback(
+  const addPlayer =
+    // useCallback(
     (address: string): void => {
       // console.log('addPlayer', address);
       const { players, honeycomb } = gameState;
@@ -152,9 +172,22 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
           [address]: playerState,
         },
       });
-    },
-    [gameState, setGameState]
-  );
+    };
+  //   ,
+  //   [gameState, setGameState]
+  // );
+
+  const queuing =
+    // useCallback(
+    (): void => {
+      // console.log('queuing');
+      setGameState({
+        ...INIT_GAME_STATE,
+        honeycomb: createHoneycomb(),
+        status: 'queuing',
+      });
+    };
+  // , [account, gameState, setGameState]);
 
   const play = (): void => {
     // clean previous game state
@@ -165,17 +198,11 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
       return;
     }
 
-    if (status === 'finished' || status === 'ready') {
+    // TODO: crete a function that returns valid states to start a game/queue
+    if (status === 'finished' || status === 'ready' || status === 'loaded') {
       // start a new game, reset all states
-      setGameState({
-        ...INIT_GAME_STATE,
-        honeycomb: createHoneycomb(),
-        status: 'queuing',
-      });
+      queuing();
     }
-
-    //
-    addPlayer(account);
   };
 
   // const changePlayer = (): void => {
@@ -192,7 +219,8 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
   //   setAccount(addressList[nextIndex]);
   // };
 
-  const move = useCallback(
+  const move =
+    //  useCallback(
     (coords?: [number, number]): void => {
       const { players, status, honeycomb } = gameState;
 
@@ -202,11 +230,8 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
       }
 
       const player = players[account];
-      console.log('move', account);
-      // console.log('move', coords);
 
       // TODO: check for game state
-
       if (!player) {
         console.log('no player found');
         return;
@@ -214,7 +239,7 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
 
       // check if current bee is idle or already moving
       if (player.status !== 'idle') {
-        console.log(`bee is not idle, is ${player.status as string} cant move`);
+        console.log(`bee is ${player.status as string} cant move`);
         return;
       }
 
@@ -259,6 +284,11 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
       // TODO: rm only for demo
       // randomly move other bees
       for (const address in players) {
+        // prevent moving
+        if (players[address].status !== 'idle') {
+          continue;
+        }
+
         const playerCoords = coordFromString(players[address].coords as string);
         const playerHex = Hexagon.get(playerCoords);
         if (playerHex) {
@@ -271,10 +301,12 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
 
           newPlayers[address] = {
             ...newPlayers[address],
-            status: 'moving',
+            status: 'moving', // todo: move to local player state
             // points: newPlayers[address].points - 5, // ?? rm point on move
             coords: nextCoordString,
           };
+
+          console.log('moving', address, 'to', nextCoordString);
 
           newHoneycomb[nextCoordString] = {
             ...newHoneycomb[nextCoordString],
@@ -283,83 +315,108 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
         }
       }
 
+      // call update state
+
       setGameState({
         ...gameState,
+        block: gameState.block + 1, // TODO: fix this workaround to update block
         honeycomb: newHoneycomb,
         players: newPlayers,
       });
 
       // TODO: test if all init with 3 neighbors at SPAWN_POINT
-      console.log(
-        `moving player ${trimAddress(account)} from  ${currentHex.x}, ${currentHex.y} to ${movingTo.x}, ${movingTo.y}`
-      );
-    },
-    [account, gameState, setGameState]
-  );
+      // console.log(
+      //   `moving player ${trimAddress(account)} from  ${currentHex.x}, ${currentHex.y} to ${movingTo.x}, ${movingTo.y}`
+      // );
+    };
+  //   ,
+  //   [account, gameState, setGameState]
+  // );
 
-  const onClick = useCallback(
-    (event: any): void => {
-      const { status, players, block, honeycomb } = gameState;
-      // console.log('clicked', event, players);
+  const beeContract = useAppContracts('Bee', ethersAppContext.chainId);
+  const tx = transactor(ethComponentsSettings, ethersAppContext?.signer);
 
-      // get point to hex (coordinates) from world coords
-      const hexCoordinates = Grid.pointToHex({ x: event.world.x, y: event.world.y });
-      if (!hexCoordinates) {
-        console.log('no hex found for ', event.world.x, event.world.y);
-        return;
+  const setGameLoaded =
+    // useCallback(
+    (): void => {
+      setGameState({
+        ...gameState,
+        status: 'loaded',
+      });
+    };
+  // , []);
+
+  const mint = useCallback(async (): Promise<void> => {
+    if (!account) {
+      console.log('🚫 not ready to mint');
+      return;
+    }
+
+    console.log('🏦 MINTING BEE TO:', account);
+
+    if (tx) {
+      try {
+        const contractTx = beeContract?.mintItem() as Promise<ContractTransaction>;
+        await tx(contractTx);
+      } catch (error) {
+        console.log('🚫 error minting', error);
       }
+    }
+  }, [account, beeContract, tx]);
 
-      // get hex from hex coordinates
-      const hex = Hexagon.get(hexCoordinates);
-      if (!hex) {
-        console.log('no hex found for ', hexCoordinates);
-        return;
-      }
+  // useBlockNumber(scaffoldAppProviders.localAdaptor?.provider, (blockNumber) =>
+  //   console.log(`⛓ A new local block is here: ${blockNumber}`)
+  // );
 
-      move([hex.x, hex.y]);
-    },
-    [gameState, move]
-  );
-
-  // call every 1seconds.
-  // usePoller(() => {
-  //   updateHives();
-  // }, 1000);
+  // TODO: implement logic using blocks
+  // useBlockNumber(scaffoldAppProviders.mainnetAdaptor?.provider, (blockNumber) => {
+  //   console.log(`⛓ A new mainnet block is here: ${blockNumber}`);
 
   useEffect(() => {
-    console.log('useEffect', account);
+    const onClick =
+      // seCallback(
+      (event: any): void => {
+        // const { status, players, block, honeycomb } = gameState;
+        console.log('clicked', event, gameState.block);
 
-    if (ethersAppContext.account !== account) {
-      console.log('account changed', account);
-      setAccount(ethersAppContext.account);
-    }
+        // get point to hex (coordinates) from world coords
+        const hexCoordinates = Grid.pointToHex({ x: event.world.x, y: event.world.y });
+        if (!hexCoordinates) {
+          console.log('no hex found for ', event.world.x, event.world.y);
+          return;
+        }
 
-    // account = ethersAppContext.account;
-    const { status, players, block, honeycomb } = gameState;
+        // get hex from hex coordinates
+        const hex = Hexagon.get(hexCoordinates);
+        if (!hex) {
+          console.log('no hex found for ', hexCoordinates);
+          return;
+        }
 
-    // update events for viewport
-    if (viewportRef.current) {
-      const viewport = viewportRef.current as Viewport;
-      viewport.off('clicked');
-      viewport.on('clicked', onClick);
-    }
+        move([hex.x, hex.y]);
+      };
+    //   ,
+    //   [gameState, move]
+    // );
 
     const interval = setInterval(() => {
-      // check if playing
-      if (status !== 'playing' || !account) {
-        // RM this only for testing, add a new player using the demos address
-        if (status === 'queuing') {
-          addPlayer(DEMO_ADDRESS[Object.keys(players).length]);
-        } else if (status === 'ready') {
-          // queueing finished, start game
-          setGameState({
-            ...gameState,
-            status: 'playing',
-          });
-        }
-        // return;
-      } else {
-        console.log('tick', ethersAppContext);
+      if (ethersAppContext.account !== account) {
+        console.log('account changed from', account, 'to', ethersAppContext.account);
+        setAccount(ethersAppContext.account);
+      }
+
+      // account = ethersAppContext.account;
+      const { status, players, block, honeycomb } = gameState;
+
+      // update events for viewport
+      if (viewportRef.current) {
+        const viewport = viewportRef.current as Viewport;
+        viewport.off('clicked');
+        viewport.on('clicked', onClick);
+      }
+
+      if (status === 'playing' && account && players[account]) {
+        // console.log('tick', ethersAppContext);
 
         // check for win conditions or game end
 
@@ -487,7 +544,7 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
 
             // get hex from hexagon
             const hexCoords = Hexagon.get(coordFromString(randomHex));
-            console.log('hexCoords', hexCoords);
+            // console.log('hexCoords', hexCoords);
 
             if (hexCoords) {
               // redward a random empty hex
@@ -500,12 +557,13 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
         }
 
         // check for end game conditions
-        const playersCount = Object.values(gameState.players).filter((player) => player.points > 0).length;
-        const endGame = players[account].status === 'dead' || playersCount <= 1;
-        const winner =
-          playersCount === 1
-            ? Object.keys(gameState.players).find((address) => gameState.players[address].points > 0)
-            : null;
+        const playersCount = Object.values(players).filter((player) => player.points > 0).length;
+        const endGame = players[account].points <= 0 || playersCount <= 1;
+        const won = playersCount === 1 ? Object.keys(players).find((address) => players[address].points > 0) : false;
+
+        // console.log('endGame', endGame);
+        // console.log('won', won);
+        // console.log('playersCount', playersCount);
 
         setGameState({
           ...gameState,
@@ -516,16 +574,43 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
           prevGameResults: endGame
             ? players[account].points > 0
               ? 'You win!'
-              : playersCount === 1
-              ? `You lose! ${trimAddress(winner as string)} won`
+              : won && won !== account
+              ? `You lose! ${trimAddress(won)} won`
               : 'Draw! nobee survived'
             : '',
           block: !endGame ? nextBlock : block,
         });
+
+        // return;
+      }
+      // check if playing
+      if (status !== 'playing') {
+        // RM this only for testing, add a new player using the demos address
+        if (status === 'queuing') {
+          // check if user is already in the game
+          if (account && account in players) {
+            addPlayer(DEMO_ADDRESS[Object.keys(players).length]);
+          } else if (account) {
+            addPlayer(account);
+          } else {
+            console.log('no account to add to queue');
+          }
+        } else if (status === 'ready') {
+          // queueing finished, start game
+          // setBlock(0);
+          setGameState({
+            ...gameState,
+            // block: 0,
+            status: 'playing',
+          });
+        }
+        // return;
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [gameState, ethersAppContext, account, addPlayer, onClick]);
+  }, [gameState, ethersAppContext, account, addPlayer]);
+
+  // });
 
   const { width, height } = useWindowSize();
 
@@ -541,7 +626,7 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
     },
   };
 
-  const { status, players, block, honeycomb, prevGameResults } = gameState;
+  const { block, status, players, honeycomb, prevGameResults } = gameState;
 
   return (
     <>
@@ -560,7 +645,11 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
             {prevGameResults && prevGameResults === 'You win!' && (
               <button
                 onClick={(): void => {
-                  play();
+                  mint()
+                    .then(() => {})
+                    .catch((error) => {
+                      console.error(error);
+                    });
                 }}>
                 Claim your Bee NFT
               </button>
@@ -570,7 +659,7 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
 
         {status === 'queuing' && (
           <>
-            <p>Waiting for players... {Object.keys(players).length}/6</p>
+            <p>Waiting for players/blocks... {Object.keys(players).length}/6</p>
             {/* <button
               onClick={(): void => {
                 addPlayer(DEMO_ADDRESS[Object.keys(players).length]);
@@ -580,7 +669,7 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
           </>
         )}
 
-        {status === 'playing' && (
+        {account && players[account] && status === 'playing' && (
           <>
             <button onClick={(): void => move()}>Auto Move</button>
             {/* <button onClick={(): void => changePlayer()}>Next Bee</button> */}
@@ -588,21 +677,21 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
             <button onClick={(): void => centerBee()}>Center</button> */}
 
             {/* TODO: review why is failing */}
-            {account && players[account] && (
-              <p className="p-2 mt-2 text-2xl bg-white">
-                <small>Playing as {trimAddress(account)}</small> <br />
-                <small>
-                  {players[account].status === 'moving'
-                    ? `Moving to ${players[account].coords || 'err'}`
-                    : players[account].status === 'dead'
-                    ? `Died at ${players[account].coords || 'err'}`
-                    : `Iddling at ${players[account].coords || 'err'}`}
-                </small>{' '}
-                <br />
-                <small>Points {players[account].points}</small> <br />
-                <small>Current block {block}</small>
-              </p>
-            )}
+            {/* {account && players[account] && ( */}
+            <p className="p-2 mt-2 text-2xl bg-white">
+              <small>Playing as {trimAddress(account)}</small> <br />
+              <small>
+                {players[account].status === 'moving'
+                  ? `Moving to ${players[account].coords || 'err'}`
+                  : players[account].status === 'dead'
+                  ? `Died at ${players[account].coords || 'err'}`
+                  : `Iddling at ${players[account].coords || 'err'}`}
+              </small>{' '}
+              <br />
+              <small>Points {players[account].points}</small> <br />
+              <small>Current block {block}</small>
+            </p>
+            {/* )} */}
           </>
         )}
       </div>
@@ -616,35 +705,36 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
           screenHeight={height}
           // worldWidth={worldWidth}
           // worldHeight={worldHeight}
-          didMount={(viewport: Viewport): void =>
-            setGameState({
-              ...gameState,
-              status: 'loaded',
-            })
-          }
-          // pointerdown={(event: any): void => {
-          //   // console.log('pointerdown', event);
-
-          //   const { offsetX, offsetY } = event.data.originalEvent;
-          //   const hexCoordinates = Grid.pointToHex({ x: offsetX, y: offsetY });
-          //   if (!hexCoordinates) {
-          //     console.log('no hex found for ', offsetX, offsetY);
-          //     return;
-          //   }
-
-          //   // get hex from hex coordinates
-          //   const hex = Hexagon.get(hexCoordinates);
-          //   if (!hex) {
-          //     console.log('no hex found for ', hexCoordinates);
-          //     return;
-          //   }
-          //   console.log('hex', hex);
-          //   move([hex.x, hex.y]);
-          // }}
-        >
+          didMount={(viewport: Viewport): void => setGameLoaded()}
+          pointerdown={(event: any): void => {
+            // console.log('pointerdown', event);
+            // const { offsetX, offsetY } = event.data.originalEvent;
+            // const hexCoordinates = Grid.pointToHex({ x: offsetX, y: offsetY });
+            // if (!hexCoordinates) {
+            //   console.log('no hex found for ', offsetX, offsetY);
+            //   return;
+            // }
+            // // get hex from hex coordinates
+            // const hex = Hexagon.get(hexCoordinates);
+            // if (!hex) {
+            //   console.log('no hex found for ', hexCoordinates);
+            //   return;
+            // }
+            // console.log('hex', hex);
+            // move([hex.x, hex.y]);
+          }}>
           {/* {status !== 'loading' && ( */}
           <PixiContainer>
-            <PixiHoneycomb ref={honeycombRef} honeycomb={honeycomb} />
+            <PixiHoneycomb
+              ref={honeycombRef}
+              honeycomb={honeycomb}
+              // pointerdown={(event: any): void => {
+              //   console.log('pointerdown', event);
+              // }}
+              // clicked={(event: any): void => {
+              //   console.log('pointerdown', event);
+              // }}
+            />
             {players &&
               Object.keys(players).map((address) => (
                 // Object.entries(players).map(([address, player]) => (
@@ -653,6 +743,12 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
                   address={address}
                   ref={address === account ? beeRef : undefined}
                   key={address}
+                  // pointerdown={(event: any): void => {
+                  //   console.log('pointerdown', event);
+                  // }}
+                  // clicked={(event: any): void => {
+                  //   console.log('pointerdown', event);
+                  // }}
                 />
               ))}
           </PixiContainer>

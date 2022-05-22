@@ -1,7 +1,7 @@
 import '~~/styles/main-page.css';
 
 import { GenericContract } from 'eth-components/ant/generic-contract';
-import { useEthersAdaptorFromProviderOrSigners } from 'eth-hooks';
+import { useBalance, useEthersAdaptorFromProviderOrSigners } from 'eth-hooks';
 import { useEthersAppContext } from 'eth-hooks/context';
 // import { useDexEthPrice } from 'eth-hooks/dapps';
 import { asEthersAdaptor } from 'eth-hooks/functions';
@@ -53,6 +53,10 @@ export const MainPage: FC = () => {
   // 🛻 load contracts
   useLoadAppContracts();
   // 🏭 connect to contracts for mainnet network & signer
+
+  const exampleMainnetProvider = scaffoldAppProviders.mainnetAdaptor?.provider;
+  const currentChainId: number | undefined = ethersAppContext.chainId;
+
   const [mainnetAdaptor] = useEthersAdaptorFromProviderOrSigners(MAINNET_PROVIDER);
   useConnectAppContracts(mainnetAdaptor);
   // 🏭 connec to  contracts for current network & signer
@@ -71,13 +75,22 @@ export const MainPage: FC = () => {
   // -----------------------------
 
   // init contracts
-  const hiveContract = useAppContracts('Hive', ethersAppContext.chainId);
+  // const hiveContract = useAppContracts('Hive', ethersAppContext.chainId);
   const beeContract = useAppContracts('Bee', ethersAppContext.chainId);
+
   // const mainnetDai = useAppContracts('DAI', NETWORKS.mainnet.chainId);
 
   // console.log(NETWORKS.mainnet.chainId);
 
-  // keep track of a variable from the contract in the local React state:
+  // keep track of a Bee's from the contract in the local React state:
+  // console.log(beeContract);
+  // useContractReader(
+  //   beeContract,
+  //   hiveContract?.purpose,
+  //   [],
+  //   hiveContract?.filters.SetPurpose()
+  // );
+
   // const [purpose, update] = useContractReader(
   //   hiveContract,
   //   hiveContract?.purpose,
@@ -95,12 +108,72 @@ export const MainPage: FC = () => {
   // const [ethPrice] = useDexEthPrice(scaffoldAppProviders.mainnetAdaptor?.provider, scaffoldAppProviders.targetNetwork);
 
   // 💰 this hook will get your balance
-  // const [yourCurrentBalance] = useBalance(ethersAppContext.account);
+  const [yourCurrentBalance] = useBalance(ethersAppContext.account);
+  // console.log(yourCurrentBalance);
 
   const [route, setRoute] = useState<string>('');
   useEffect(() => {
     setRoute(window.location.pathname);
   }, [setRoute]);
+
+  // ---------------------
+  // 🏦 get your balance
+  // ---------------------
+  // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
+  // const [yourLocalBalance] = useBalance(ethersAppContext.account);
+
+  // // Just plug in different 🛰 providers to get your balance on different chains:
+  // const [yourMainnetBalance, yUpdate, yStatus] = useBalance(ethersAppContext.account, mergeDefaultUpdateOptions(), {
+  //   adaptorEnabled: true,
+  //   adaptor: mainnetAdaptor,
+  // });
+
+  // console.log('🏦 yourLocalBalance:', yourLocalBalance);
+  // console.log('🏦 yourMainnetBalance:', yourMainnetBalance);
+  // console.log('🏦 yUpdate:', yUpdate);
+  // console.log('🏦 yStatus:', yStatus);
+
+  // Update your collectibles
+  //
+  // 🧠 This effect will update yourCollectibles by polling when your balance changes
+  //
+
+  // keep track of a variable from the contract in the local React state:
+  // const balance = useContractReader(readContracts, "YourCollectible", "balanceOf", [address]);
+  // console.log("🤗 balance:", balance);
+
+  // const yourBalance = balance && balance.toNumber && balance.toNumber();
+  const [yourCollectibles, setYourCollectibles] = useState();
+  useEffect(() => {
+    // console.log('💰 yourCurrentBalance:', yourCurrentBalance);
+    //   const collectibleUpdate = [];
+    // for (let tokenIndex = 0; tokenIndex < balance; tokenIndex++) {
+    //   try {
+    //     console.log('GEtting token index', tokenIndex);
+    //     const tokenId = await readContracts.YourCollectible.tokenOfOwnerByIndex(address, tokenIndex);
+    //     console.log('tokenId', tokenId);
+    //     const tokenURI = await readContracts.YourCollectible.tokenURI(tokenId);
+    //     const jsonManifestString = atob(tokenURI.substring(29));
+    //     console.log('jsonManifestString', jsonManifestString);
+    //     /*
+    //       const ipfsHash = tokenURI.replace("https://ipfs.io/ipfs/", "");
+    //       console.log("ipfsHash", ipfsHash);
+    //       const jsonManifestBuffer = await getFromIPFS(ipfsHash);
+    //     */
+    //     try {
+    //       const jsonManifest = JSON.parse(jsonManifestString);
+    //       console.log('jsonManifest', jsonManifest);
+    //       collectibleUpdate.push({ id: tokenId, uri: tokenURI, owner: address, ...jsonManifest });
+    //     } catch (e) {
+    //       console.log(e);
+    //     }
+    //   } catch (e) {
+    //     console.log(e);
+    //   }
+    // }
+    // setYourCollectibles(collectibleUpdate.reverse());
+    // console.log('💰 yourCurrentBalance:', yourCurrentBalance);
+  }, [ethersAppContext.account, yourCurrentBalance]);
 
   // -----------------------------
   // 📃 Page List
@@ -113,20 +186,52 @@ export const MainPage: FC = () => {
     },
     pages: [
       {
-        name: 'Hive',
+        name: 'Bee',
         content: (
           <div style={{ marginTop: '100px' }}>
-            <GenericContract
-              contractName="Hive"
-              contract={hiveContract}
-              mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
-              blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
-            />
+            {/* {yourCollectibles && (
+              <List
+                bordered
+                dataSource={yourCollectibles}
+                renderItem={(item: any): any => {
+                  const id = item.id.toNumber();
+                  const key = `${id}_${item.uri || ''}_${item.owner || ''}`;
+                  return (
+                    <List.Item key={key}>
+                      <Card
+                        title={
+                          <div>
+                            <span style={{ fontSize: 18, marginRight: 8 }}>{item.name}</span>
+                          </div>
+                        }>
+                        <img src={item.image || 'noimage'} />
+                      </Card>
+                    </List.Item>
+                  );
+                }}
+              />
+            )}
+
+            {!yourCollectibles && <div>You do not have any collectibles yet!</div>} */}
           </div>
         ),
       },
+      // TODO: some day, a fully dex game
+      // {
+      //   name: 'Hive',
+      //   content: (
+      //     <div style={{ marginTop: '100px' }}>
+      //       <GenericContract
+      //         contractName="Hive"
+      //         contract={hiveContract}
+      //         mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
+      //         blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
+      //       />
+      //     </div>
+      //   ),
+      // },
       {
-        name: 'Bee',
+        name: 'Contract',
         content: (
           <div style={{ marginTop: '100px' }}>
             <GenericContract
