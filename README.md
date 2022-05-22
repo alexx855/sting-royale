@@ -18,12 +18,6 @@ Also watch out of red zones (one ring turns red every 10 blocks killing all bees
 
 [![video](https://raw.githubusercontent.com/alexx855/sting-royale/release/cover.png)](https://www.youtube.com/watch?v=cj8Ib7IUUSQ)
 
-# IPFS CID bafybeie66c2m7erevt2yk2i6w2w76je4ppje46wz63yy5m5t4ifnkc6vyq
-
-https://bafybeie66c2m7erevt2yk2i6w2w76je4ppje46wz63yy5m5t4ifnkc6vyq.ipfs.infura-ipfs.io/
-https://ipfs.io/ipfs/bafybeie66c2m7erevt2yk2i6w2w76je4ppje46wz63yy5m5t4ifnkc6vyq
-https://gateway.pinata.cloud/ipfs/bafybeie66c2m7erevt2yk2i6w2w76je4ppje46wz63yy5m5t4ifnkc6vyq/
-
 ### Generate video speech for the video
 
 ```
