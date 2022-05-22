@@ -143,37 +143,37 @@ export const MainPage: FC = () => {
   // console.log("🤗 balance:", balance);
 
   // const yourBalance = balance && balance.toNumber && balance.toNumber();
-  const [yourCollectibles, setYourCollectibles] = useState();
-  useEffect(() => {
-    // console.log('💰 yourCurrentBalance:', yourCurrentBalance);
-    //   const collectibleUpdate = [];
-    // for (let tokenIndex = 0; tokenIndex < balance; tokenIndex++) {
-    //   try {
-    //     console.log('GEtting token index', tokenIndex);
-    //     const tokenId = await readContracts.YourCollectible.tokenOfOwnerByIndex(address, tokenIndex);
-    //     console.log('tokenId', tokenId);
-    //     const tokenURI = await readContracts.YourCollectible.tokenURI(tokenId);
-    //     const jsonManifestString = atob(tokenURI.substring(29));
-    //     console.log('jsonManifestString', jsonManifestString);
-    //     /*
-    //       const ipfsHash = tokenURI.replace("https://ipfs.io/ipfs/", "");
-    //       console.log("ipfsHash", ipfsHash);
-    //       const jsonManifestBuffer = await getFromIPFS(ipfsHash);
-    //     */
-    //     try {
-    //       const jsonManifest = JSON.parse(jsonManifestString);
-    //       console.log('jsonManifest', jsonManifest);
-    //       collectibleUpdate.push({ id: tokenId, uri: tokenURI, owner: address, ...jsonManifest });
-    //     } catch (e) {
-    //       console.log(e);
-    //     }
-    //   } catch (e) {
-    //     console.log(e);
-    //   }
-    // }
-    // setYourCollectibles(collectibleUpdate.reverse());
-    // console.log('💰 yourCurrentBalance:', yourCurrentBalance);
-  }, [ethersAppContext.account, yourCurrentBalance]);
+  // const [yourCollectibles, setYourCollectibles] = useState();
+  // useEffect(() => {
+  // console.log('💰 yourCurrentBalance:', yourCurrentBalance);
+  //   const collectibleUpdate = [];
+  // for (let tokenIndex = 0; tokenIndex < balance; tokenIndex++) {
+  //   try {
+  //     console.log('GEtting token index', tokenIndex);
+  //     const tokenId = await readContracts.YourCollectible.tokenOfOwnerByIndex(address, tokenIndex);
+  //     console.log('tokenId', tokenId);
+  //     const tokenURI = await readContracts.YourCollectible.tokenURI(tokenId);
+  //     const jsonManifestString = atob(tokenURI.substring(29));
+  //     console.log('jsonManifestString', jsonManifestString);
+  //     /*
+  //       const ipfsHash = tokenURI.replace("https://ipfs.io/ipfs/", "");
+  //       console.log("ipfsHash", ipfsHash);
+  //       const jsonManifestBuffer = await getFromIPFS(ipfsHash);
+  //     */
+  //     try {
+  //       const jsonManifest = JSON.parse(jsonManifestString);
+  //       console.log('jsonManifest', jsonManifest);
+  //       collectibleUpdate.push({ id: tokenId, uri: tokenURI, owner: address, ...jsonManifest });
+  //     } catch (e) {
+  //       console.log(e);
+  //     }
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // }
+  // setYourCollectibles(collectibleUpdate.reverse());
+  // console.log('💰 yourCurrentBalance:', yourCurrentBalance);
+  // }, [ethersAppContext.account, yourCurrentBalance]);
 
   // -----------------------------
   // 📃 Page List
@@ -271,7 +271,7 @@ export const MainPage: FC = () => {
             display: 'flex',
             justifyContent: 'center',
             width: '100%',
-            zIndex: 10,
+            zIndex: 99,
           }}>
           {tabMenu}
         </div>

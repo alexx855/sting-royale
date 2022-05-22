@@ -8,7 +8,7 @@ import { IHoneycombProps } from '~~/helpers/interfaces';
 // TODO: make intrectactive, add pointerdown, pointerup, pointermove
 const PixiHoneycombComponent = PixiComponent<IHoneycombProps, Graphics>('Honeycomb', {
   create: (props) => {
-    console.log('create honeycomb grid');
+    // console.log('create honeycomb grid');
     const graphics = drawHexGrid(new Graphics(), props.honeycomb);
     return graphics;
   },

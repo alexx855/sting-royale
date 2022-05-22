@@ -589,7 +589,7 @@ export const MainPageGame: FC<IMainPageGameProps> = (props) => {
         if (status === 'queuing') {
           // check if user is already in the game
           if (account && account in players) {
-            addPlayer(DEMO_ADDRESS[Object.keys(players).length]);
+            addPlayer(DEMO_ADDRESS[Math.floor(Math.random() * DEMO_ADDRESS.length)]);
           } else if (account) {
             addPlayer(account);
           } else {

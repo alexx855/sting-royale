@@ -30,28 +30,14 @@ export interface IGameState {
 export interface IHoneycombProps {
   honeycomb: IHoneyComb;
   app: Application;
-  //   onCreate?: (hex: Hex<{ size: number; moisture: number }>) => void;
+  [key: string]: any;
 }
 
 export interface IBeeProps {
   players: { [key: string]: IPlayerState };
   address: string;
-  // points: number;
-  // coords: [number, number];
-  // animate?: boolean;
-  // scale?: number;
-  // rad?: number;
-  // rotation?: number;
-  // x?: number;
-  // y?: number;
-  // name?: string;
+  [key: string]: any;
 }
-
-// export interface IBeeContainerProps {
-//   x?: number;
-//   y?: number;
-// }
-
 export interface IViewportProps {
   app: Application;
   screenWidth: number;
@@ -59,9 +45,5 @@ export interface IViewportProps {
   worldWidth: number;
   worldHeight: number;
   plugins?: any[];
-  children?: any;
-  didMount?: any;
-  onClick?: any;
-  gameState?: any;
-  currentAddress?: any;
+  [key: string]: any;
 }
